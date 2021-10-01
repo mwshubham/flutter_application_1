@@ -12,6 +12,7 @@ class RandomWords extends StatefulWidget {
 
 class _RandomWordsState extends State<RandomWords> {
   final _suggestions = <WordPair>[];
+  final _saved = <WordPair>{};
   final _biggerFont = const TextStyle(fontSize: 18.0);
 
   @override
@@ -19,9 +20,35 @@ class _RandomWordsState extends State<RandomWords> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Startup Name Generator'),
+        actions: [IconButton(onPressed: _pushSaved, icon: Icon(Icons.list))],
       ),
       body: _buildSuggestions(),
     );
+  }
+
+  void _pushSaved() {
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (BuildContext context) {
+      final tiles = _saved.map((pair) => ListTile(
+              title: Text(
+            pair.asPascalCase,
+            style: _biggerFont,
+          )));
+
+      final divided = tiles.isNotEmpty
+          ? ListTile.divideTiles(context: context, tiles: tiles).toList()
+          : [
+              ListTile(
+                  title: Text(
+                "No Saved Suggestions",
+                style: _biggerFont,
+              ))
+            ];
+      return Scaffold(
+        appBar: AppBar(title: Text('Saved Suggestions (${tiles.length})')),
+        body: ListView(children: divided),
+      );
+    }));
   }
 
   Widget _buildSuggestions() {
@@ -40,11 +67,25 @@ class _RandomWordsState extends State<RandomWords> {
   }
 
   Widget _buildRow(WordPair pair, int index) {
+    final alreadySaved = _saved.contains(pair);
     return ListTile(
       title: Text(
         "${pair.asPascalCase} ($index)",
         style: _biggerFont,
       ),
+      trailing: Icon(
+        alreadySaved ? Icons.favorite : Icons.favorite_border,
+        color: alreadySaved ? Colors.red : null,
+      ),
+      onTap: () {
+        setState(() {
+          if (alreadySaved) {
+            _saved.remove(pair);
+          } else {
+            _saved.add(pair);
+          }
+        });
+      },
     );
   }
 }

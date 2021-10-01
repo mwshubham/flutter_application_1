@@ -1,18 +1,58 @@
 import 'package:flutter/material.dart';
+import 'package:english_words/english_words.dart';
 
-void main() {
-  runApp(MyApp());
+void main() => runApp(MyApp());
+
+class RandomWords extends StatefulWidget {
+  const RandomWords({Key? key}) : super(key: key);
+
+  @override
+  _RandomWordsState createState() => _RandomWordsState();
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+class _RandomWordsState extends State<RandomWords> {
+  final _suggestions = <WordPair>[];
+  final _biggerFont = const TextStyle(fontSize: 18.0);
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        home: Material(
-            child: Center(
-                child: Container(
-                    child: Text("Welcome to my my first Flutter App")))));
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Startup Name Generator'),
+      ),
+      body: _buildSuggestions(),
+    );
+  }
+
+  Widget _buildSuggestions() {
+    return ListView.builder(
+        padding: const EdgeInsets.all(16.0),
+        itemCount: 201,
+        itemBuilder: (context, i) {
+          if (i.isOdd) return const Divider();
+
+          final index = i ~/ 2;
+          if (index >= _suggestions.length) {
+            _suggestions.addAll(generateWordPairs().take(10));
+          }
+          return _buildRow(_suggestions[index], index);
+        });
+  }
+
+  Widget _buildRow(WordPair pair, int index) {
+    return ListTile(
+      title: Text(
+        "${pair.asPascalCase} ($index)",
+        style: _biggerFont,
+      ),
+    );
+  }
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+        title: 'Startup Name Generator', home: RandomWords());
   }
 }
